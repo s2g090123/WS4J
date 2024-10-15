@@ -29,7 +29,7 @@ object SimilarityCalculationDemo {
     fun main(args: Array<String>) {
         val t = System.currentTimeMillis()
         rcs.forEach { rc ->
-            println(rc.javaClass.getName() + "\t" + rc.calcRelatednessOfWords("act", "moderate"))
+            println(rc.javaClass.getName() + "\t" + rc.calcRelatednessOfWords("close", "card"))
         }
         println("Done in ${System.currentTimeMillis() - t} msec.")
     }

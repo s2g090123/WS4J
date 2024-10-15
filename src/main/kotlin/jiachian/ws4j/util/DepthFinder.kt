@@ -52,6 +52,6 @@ class DepthFinder(db: ILexicalDatabase) {
     }
 
     fun getShortestDepth(concept: Concept): Int {
-        return getSynsetDepths(concept)[0].depth
+        return getSynsetDepths(concept).last().depth
     }
 }
