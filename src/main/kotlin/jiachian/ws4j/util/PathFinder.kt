@@ -20,7 +20,7 @@ class PathFinder(private val db: ILexicalDatabase) {
             for (rTree in rTrees) {
                 val subsumer = getSubsumerFromTrees(lTree, rTree) ?: continue
                 var lCount = 0
-                val lPath = ArrayList<Concept>(lTree.size)
+                val lPath = mutableListOf<Concept>()
                 val reversedLTree = lTree.reversed()
                 for (synset in reversedLTree) {
                     lCount++
@@ -28,7 +28,7 @@ class PathFinder(private val db: ILexicalDatabase) {
                     lPath.add(synset)
                 }
                 var rCount = 0
-                val rPath = ArrayList<Concept>(rTree.size)
+                val rPath = mutableListOf<Concept>()
                 val reversedRTree = rTree.reversed()
                 for (synset in reversedRTree) {
                     rCount++
@@ -38,7 +38,9 @@ class PathFinder(private val db: ILexicalDatabase) {
                 paths.add(
                     Subsumer(
                         Concept(subsumer.synsetID, concept1.pos),
-                        rCount + lCount - 1, lPath, rPath
+                        rCount + lCount - 1,
+                        lPath,
+                        rPath
                     )
                 )
                 if (tracer != null) {
@@ -87,9 +89,7 @@ class PathFinder(private val db: ILexicalDatabase) {
         val synLinks = db.getLinkedSynsets(synset, Link.HYPERNYM)
         val returnList = mutableListOf<List<Concept>>()
         if (synLinks.isEmpty()) {
-            val tree = mutableListOf<Concept>()
-            tree.add(synset)
-            tree.add(0, Concept("0"))
+            val tree = listOf(Concept("0")) + synset
             returnList.add(tree)
         } else {
             for (hypernym in synLinks) {
@@ -97,14 +97,11 @@ class PathFinder(private val db: ILexicalDatabase) {
                 history.add(hypernym)
                 val hypernymTrees = getHypernymTrees(hypernym, history)
                 for (hypernymTree in hypernymTrees) {
-                    val list = hypernymTree.toMutableList()
-                    list.add(synset)
+                    val list = hypernymTree + synset
                     returnList.add(list)
                 }
                 if (returnList.isEmpty()) {
-                    val newList = mutableListOf<Concept>()
-                    newList.add(synset)
-                    newList.add(0, Concept("0"))
+                    val newList = listOf(Concept("0")) + synset
                     returnList.add(newList)
                 }
             }
@@ -135,8 +132,7 @@ class PathFinder(private val db: ILexicalDatabase) {
     }
 
     fun getRoot(synset: Concept): Concept? {
-        val history = HashSet<Concept>()
-        val paths = getHypernymTrees(synset, history)
+        val paths = getHypernymTrees(synset, mutableSetOf())
         return if (paths.isNotEmpty()) {
             if (paths[0].size > 1) paths[0][1] else paths[0][0]
         } else {
@@ -150,10 +146,7 @@ class PathFinder(private val db: ILexicalDatabase) {
         tracer: StringBuilder?
     ): List<Subsumer> {
         val paths = getAllPaths(concept1, concept2, tracer)
-        val returnPaths = ArrayList<Subsumer>(paths.size)
-        paths.forEach { path ->
-            if (path.pathLength <= paths[0].pathLength) returnPaths.add(path)
-        }
+        val returnPaths = paths.filter { path -> path.pathLength <= paths[0].pathLength }
         return returnPaths
     }
 
@@ -185,12 +178,7 @@ class PathFinder(private val db: ILexicalDatabase) {
         }
 
         private fun clone(originals: List<List<Concept>>): List<List<Concept>> {
-            val clone = ArrayList<List<Concept>>(originals.size)
-            originals.forEach { original ->
-                val cStrings = ArrayList<Concept>(original.size)
-                cStrings.addAll(original)
-                clone.add(cStrings)
-            }
+            val clone = originals.map { it.toList() }
             return clone
         }
     }

@@ -36,33 +36,38 @@ class MatrixCalculator(db: ILexicalDatabase) {
             var bestScore = 1.0
             for (score in scores) {
                 for (aScore in score) {
-                    if (aScore > bestScore && aScore != Double.MAX_VALUE) bestScore = aScore
+                    if (aScore > bestScore && aScore != Double.MAX_VALUE) {
+                        bestScore = aScore
+                    }
                 }
             }
             for (i in scores.indices) {
                 for (j in scores[i].indices) {
-                    if (scores[i][j] == Double.MAX_VALUE) scores[i][j] = 1.0
-                    else scores[i][j] /= bestScore
+                    if (scores[i][j] == Double.MAX_VALUE) {
+                        scores[i][j] = 1.0
+                    } else {
+                        scores[i][j] /= bestScore
+                    }
                 }
             }
             return scores
         }
 
         fun getSynonymyMatrix(words1: Array<String>, words2: Array<String>): Array<DoubleArray> {
-            val synonyms1 = ArrayList<Set<String>>(words1.size)
+            val synonyms1 = mutableListOf<Set<String>>()
             words1.forEach { aWords1 ->
                 val synonyms = mutableSetOf<String>()
-                POS.values().forEach { pos ->
+                POS.entries.forEach { pos ->
                     db?.getAllConcepts(aWords1, pos)?.forEach { concept ->
                         synonyms.add(concept.synsetID)
                     }
                 }
                 synonyms1.add(synonyms)
             }
-            val synonyms2 = ArrayList<Set<String>>(words2.size)
+            val synonyms2 = mutableListOf<Set<String>>()
             words2.forEach { aWords2 ->
                 val synonyms = mutableSetOf<String>()
-                POS.values().forEach { pos ->
+                POS.entries.forEach { pos ->
                     db?.getAllConcepts(aWords2, pos)?.forEach { concept ->
                         synonyms.add(concept.synsetID)
                     }
@@ -80,7 +85,7 @@ class MatrixCalculator(db: ILexicalDatabase) {
                     }
                     val s1 = synonyms1[i]
                     val s2 = synonyms2[j]
-                    result[i][j] = if ((s1.contains(w2) || s2.contains(w1))) 1.0 else 0.0
+                    result[i][j] = if (s1.contains(w2) || s2.contains(w1)) 1.0 else 0.0
                 }
             }
             return result

@@ -36,16 +36,13 @@ object WS4J {
         return hso.calcRelatednessOfWords(word1, word2)
     }
 
-
     fun runLCH(word1: String, word2: String): Double {
         return lch.calcRelatednessOfWords(word1, word2)
     }
 
-
     fun runRES(word1: String, word2: String): Double {
         return res.calcRelatednessOfWords(word1, word2)
     }
-
 
     fun runJCN(word1: String, word2: String): Double {
         return jcn.calcRelatednessOfWords(word1, word2)
@@ -54,7 +51,6 @@ object WS4J {
     fun runLIN(word1: String, word2: String): Double {
         return lin.calcRelatednessOfWords(word1, word2)
     }
-
 
     fun runLESK(word1: String, word2: String): Double {
         return lesk.calcRelatednessOfWords(word1, word2)

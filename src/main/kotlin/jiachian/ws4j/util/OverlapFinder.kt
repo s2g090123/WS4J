@@ -15,7 +15,7 @@ object OverlapFinder {
         words1 = StopWordRemover.instance.removeStopWords(words1)
         overlaps.length1 = words0.size
         overlaps.length2 = words1.size
-        val overlapsLengths = HashMap<Int, Int>()
+        val overlapsLengths = mutableMapOf<Int, Int>()
         var matchStartIndex = 0
         var currIndex = -1
         while (currIndex < words0.size - 1) {
@@ -33,26 +33,28 @@ object OverlapFinder {
         }
         var longestOverlap = -1
         for (length in overlapsLengths.values) {
-            if (longestOverlap < length) longestOverlap = length
+            if (longestOverlap < length) {
+                longestOverlap = length
+            }
         }
         overlaps.overlapsHash = ConcurrentHashMap(overlapsLengths.size)
         while (longestOverlap > 0) {
             for (i in 0 until overlapsLengths.size) {
-                if ((overlapsLengths[i] ?: -1) < longestOverlap) continue
+                if (requireNotNull(overlapsLengths[i]) < longestOverlap) continue
                 val stringEnd = i + longestOverlap - 1
                 if (containsReplace(words1, words0, i, stringEnd)) {
-                    val words0Sub = ArrayList<String>(stringEnd - i + 1)
+                    val words0Sub = mutableListOf<String>()
                     words0Sub.addAll(words0.slice(i..stringEnd))
                     val temp = words0Sub.joinToString(" ")
-                    synchronized(overlaps.overlapsHash ?: this) {
-                        val v = if (overlaps.overlapsHash?.get(temp) != null) overlaps.overlapsHash?.get(temp) else 0
-                        v?.let { overlaps.overlapsHash?.put(temp, it + 1) }
+                    synchronized(requireNotNull(overlaps.overlapsHash)) {
+                        val v = overlaps.overlapsHash?.get(temp) ?: 0
+                        overlaps.overlapsHash?.put(temp, v + 1)
                     }
                     for (j in i until i + longestOverlap) {
                         overlapsLengths[j] = 0
                     }
                     for (j in i - 1 downTo 0) {
-                        if ((overlapsLengths[j] ?: 0) <= i - j) break
+                        if (requireNotNull(overlapsLengths[j]) <= i - j) break
                         overlapsLengths[j] = i - j
                     }
                 } else {
@@ -66,12 +68,21 @@ object OverlapFinder {
                 }
             }
             longestOverlap = -1
-            for (length in overlapsLengths.values) if (longestOverlap < length) longestOverlap = length
+            for (length in overlapsLengths.values) {
+                if (longestOverlap < length) {
+                    longestOverlap = length
+                }
+            }
         }
         return overlaps
     }
 
-    private fun containsReplace(words1: Array<String>, words2: Array<String>, begin: Int, end: Int): Boolean {
+    private fun containsReplace(
+        words1: Array<String>,
+        words2: Array<String>,
+        begin: Int,
+        end: Int
+    ): Boolean {
         return contains(words1, words2, begin, end, true)
     }
 
@@ -108,9 +119,9 @@ object OverlapFinder {
         return false
     }
 
-    class Overlaps {
-        var overlapsHash: ConcurrentMap<String, Int>? = null
-        var length1: Int = 0
-        var length2: Int = 0
-    }
+    data class Overlaps(
+        var overlapsHash: ConcurrentMap<String, Int>? = null,
+        var length1: Int = 0,
+        var length2: Int = 0,
+    )
 }

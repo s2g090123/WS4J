@@ -19,7 +19,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 class MITWordNet : ILexicalDatabase {
-    constructor(dict: IRAMDictionary?) {
+    var dictionary: IRAMDictionary? = null
+    private var glosses: ConcurrentMap<String, List<String>>? = null
+
+    constructor(dict: IRAMDictionary) {
         dictionary = dict
         if (WS4JConfiguration.getInstance().useCache()) {
             glosses = ConcurrentHashMap()
@@ -145,7 +148,7 @@ class MITWordNet : ILexicalDatabase {
         val key = "$concept $link"
         if (WS4JConfiguration.getInstance().useCache()) {
             glosses?.get(key)?.let {
-                return it.toList()
+                return it
             }
         }
         val linkedSynsets = getLinkedSynsets(concept, link)
@@ -163,7 +166,7 @@ class MITWordNet : ILexicalDatabase {
                 .replace("[.;:,?!(){}\"`$%@<>]".toRegex(), " ")
                 .replace("&".toRegex(), " and ")
                 .replace("_".toRegex(), " ")
-                .replace("[ ]+".toRegex(), " ")
+                .replace(" +".toRegex(), " ")
                 .replace("(?<!\\w)'".toRegex(), " ")
                 .replace("'(?!\\w)".toRegex(), " ")
                 .replace("--".toRegex(), " ")
@@ -174,7 +177,7 @@ class MITWordNet : ILexicalDatabase {
             glosses.add(gloss)
         }
         if (WS4JConfiguration.getInstance().useCache()) {
-            Companion.glosses?.put(key, glosses.toList())
+            this.glosses?.put(key, glosses.toList())
         }
         return glosses
     }
@@ -183,8 +186,5 @@ class MITWordNet : ILexicalDatabase {
         private val LOGGER: Logger = LoggerFactory.getLogger(MITWordNet::class.java)
 
         private const val WORDNET_FILE = "wn30.dict"
-
-        private var dictionary: IRAMDictionary? = null
-        private var glosses: ConcurrentMap<String, List<String>>? = null
     }
 }

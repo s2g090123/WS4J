@@ -7,7 +7,7 @@ import jiachian.ws4j.util.WS4JConfiguration
 
 
 object SimilarityCalculationDemo {
-    private var rcs: Array<RelatednessCalculator>
+    private val rcs: Array<RelatednessCalculator>
 
     init {
         WS4JConfiguration.getInstance().setMemoryDB(false)
@@ -29,7 +29,7 @@ object SimilarityCalculationDemo {
     fun main(args: Array<String>) {
         val t = System.currentTimeMillis()
         rcs.forEach { rc ->
-            println(rc.javaClass.getName() + "\t" + rc.calcRelatednessOfWords("OK", "GO"))
+            println(rc.javaClass.getName() + "\t" + rc.calcRelatednessOfWords("act", "moderate"))
         }
         println("Done in ${System.currentTimeMillis() - t} msec.")
     }

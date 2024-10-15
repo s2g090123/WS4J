@@ -7,7 +7,6 @@ import jiachian.ws4j.Relatedness
 import jiachian.ws4j.RelatednessCalculator
 import jiachian.ws4j.util.ICFinder
 import jiachian.ws4j.util.WS4JConfiguration
-import java.util.*
 
 
 /**
@@ -50,10 +49,10 @@ class Lin(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         }
         val ic1 = ICFinder.instance.IC(pathFinder, concept1)
         val ic2 = ICFinder.instance.IC(pathFinder, concept2)
-        val score = if ((ic1 > 0 && ic2 > 0)) (2.0 * lcsList[0].iC / (ic1 + ic2)) else 0.0
+        val score = if (ic1 > 0 && ic2 > 0) 2.0 * lcsList[0].iC / (ic1 + ic2) else 0.0
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("LIN(").append(concept1).append(", ").append(concept2).append(")\n")
-            tracer.append(Objects.requireNonNull(subTracer))
+            tracer.append(subTracer)
             lcsList.forEach { lcs ->
                 tracer.append("Lowest Common Subsumer(s): ")
                 tracer.append(lcs.subsumer).append(" (IC = ").append(lcs.iC).append(")\n")

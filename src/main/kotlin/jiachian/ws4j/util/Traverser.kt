@@ -16,7 +16,9 @@ class Traverser(private val db: ILexicalDatabase) {
         val wordsH = db.getWords(concept1)
         val wordsN = db.getWords(concept2)
         for (wordH in wordsH) {
-            for (wordN in wordsN) if (wordH.contains(wordN) || wordN.contains(wordH)) return true
+            for (wordN in wordsN) {
+                if (wordH.contains(wordN) || wordN.contains(wordH)) return true
+            }
         }
         return false
     }
@@ -27,10 +29,7 @@ class Traverser(private val db: ILexicalDatabase) {
                 return it
             }
         }
-        val points = ArrayList<Link>()
-        points.add(Link.ANTONYM)
-        points.add(Link.ATTRIBUTE)
-        points.add(Link.SIMILAR_TO)
+        val points = listOf(Link.ANTONYM, Link.ATTRIBUTE, Link.SIMILAR_TO)
         val result = getGroupedSynsets(synset, points)
         if (WS4JConfiguration.getInstance().useCache()) {
             horizonCache?.put(synset, result)
@@ -44,9 +43,7 @@ class Traverser(private val db: ILexicalDatabase) {
                 return it
             }
         }
-        val points = ArrayList<Link>()
-        points.add(Link.HYPERNYM)
-        points.add(Link.MERONYM)
+        val points = listOf(Link.HYPERNYM, Link.MERONYM)
         val result = getGroupedSynsets(synset, points)
         if (WS4JConfiguration.getInstance().useCache()) {
             upwardCache?.put(synset, result)
@@ -60,14 +57,9 @@ class Traverser(private val db: ILexicalDatabase) {
                 return it
             }
         }
-        val points = ArrayList<Link>()
-        points.add(Link.CAUSE)
-        points.add(Link.ENTAILMENT)
-        points.add(Link.HOLONYM)
-        points.add(Link.HYPONYM)
+        val points = listOf(Link.CAUSE, Link.ENTAILMENT, Link.HOLONYM, Link.HYPONYM)
         val result = getGroupedSynsets(synset, points)
-        if (WS4JConfiguration.getInstance().useCache()
-        ) {
+        if (WS4JConfiguration.getInstance().useCache()) {
             downwardCache?.put(synset, result)
         }
         return result
@@ -77,10 +69,9 @@ class Traverser(private val db: ILexicalDatabase) {
         synset: Concept,
         points: List<Link>
     ): Set<Concept> {
-        val synsets = HashSet<Concept>()
-        points.forEach { point ->
-            synsets.addAll(db.getLinkedSynsets(synset, point))
-        }
+        val synsets = points.flatMap { point ->
+            db.getLinkedSynsets(synset, point)
+        }.toSet()
         return synsets
     }
 

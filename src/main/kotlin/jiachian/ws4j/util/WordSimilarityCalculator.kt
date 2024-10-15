@@ -1,6 +1,5 @@
 package jiachian.ws4j.util
 
-import com.google.common.base.Preconditions
 import jiachian.lexical_db.item.POS
 import jiachian.ws4j.RelatednessCalculator
 import java.util.*
@@ -102,22 +101,16 @@ class WordSimilarityCalculator {
                     rc.lexicalDB.getConcept(normalizeWord2, posPair[1], sense2)
                 ).score
             } else if (sense1 == 0 && sense2 > 0) {
-                for (concept in rc.lexicalDB.getAllConcepts(
-                    normalizeWord1,
-                    posPair[0]
-                )) {
+                for (concept in rc.lexicalDB.getAllConcepts(normalizeWord1, posPair[0])) {
                     val relatedness = rc.calcRelatednessOfSynsets(
                         concept,
                         rc.lexicalDB.getConcept(normalizeWord2, posPair[1], sense2)
                     )
-                    val score: Double = relatedness.score
+                    val score = relatedness.score
                     if (score > maxScore) maxScore = score
                 }
             } else if (sense1 > 0 && sense2 == 0) {
-                for (concept in rc.lexicalDB.getAllConcepts(
-                    normalizeWord2,
-                    posPair[1]
-                )) {
+                for (concept in rc.lexicalDB.getAllConcepts(normalizeWord2, posPair[1])) {
                     val relatedness = rc.calcRelatednessOfSynsets(
                         rc.lexicalDB.getConcept(normalizeWord1, posPair[0], sense1),
                         concept
@@ -139,14 +132,8 @@ class WordSimilarityCalculator {
                 val score = rc.calcRelatednessOfSynsets(concept1, concept2).score
                 if (score > maxScore) maxScore = score
             } else {
-                for (concept1 in rc.lexicalDB.getAllConcepts(
-                    normalizeWord1,
-                    posPair[0]
-                )) {
-                    for (concept2 in rc.lexicalDB.getAllConcepts(
-                        normalizeWord2,
-                        posPair[1]
-                    )) {
+                for (concept1 in rc.lexicalDB.getAllConcepts(normalizeWord1, posPair[0])) {
+                    for (concept2 in rc.lexicalDB.getAllConcepts(normalizeWord2, posPair[1])) {
                         val relatedness = rc.calcRelatednessOfSynsets(concept1, concept2)
                         val score = relatedness.score
                         if (score > maxScore) maxScore = score
@@ -156,8 +143,10 @@ class WordSimilarityCalculator {
         }
         if (maxScore == -1.0) maxScore = 0.0
         maxScore = abs(maxScore)
-        Preconditions.checkArgument(maxScore >= rc.min && maxScore <= rc.max)
-        if (WS4JConfiguration.getInstance().useCache()) cache?.put(key, maxScore)
+        check(maxScore >= rc.min && maxScore <= rc.max)
+        if (WS4JConfiguration.getInstance().useCache()) {
+            cache?.put(key, maxScore)
+        }
         return maxScore
     }
 

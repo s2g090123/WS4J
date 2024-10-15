@@ -6,7 +6,6 @@ import jiachian.lexical_db.item.POS
 import jiachian.ws4j.Relatedness
 import jiachian.ws4j.RelatednessCalculator
 import jiachian.ws4j.util.WS4JConfiguration
-import java.util.*
 
 
 /**
@@ -40,11 +39,10 @@ class Path(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         if (shortestPaths.isEmpty()) return Relatedness(min)
         val path = shortestPaths[0]
         val dist = path.pathLength
-        val score = if (dist > 0) 1.0 / dist.toDouble()
-        else -1.0
+        val score = if (dist > 0) 1.0 / dist else -1.0
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("PATH(").append(concept1).append(", ").append(concept2).append(")\n")
-            tracer.append(Objects.requireNonNull(subTracer))
+            tracer.append(requireNotNull(subTracer))
             tracer.append("Shortest path: ").append(path).append("\n")
             tracer.append("Path length = ").append(dist).append("\n")
         }

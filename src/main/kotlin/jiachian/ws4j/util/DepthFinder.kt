@@ -15,19 +15,16 @@ class DepthFinder(db: ILexicalDatabase) {
     ): List<Depth>? {
         val paths = pathFinder.getAllPaths(concept1, concept2, tracer)
         if (paths.isEmpty()) return null
-        var depthList = ArrayList<Depth>(paths.size)
+        var depthList = mutableListOf<Depth>()
         for (s in paths) {
             val depths = getSynsetDepths(s.subsumer)
-            if (depths.isNullOrEmpty()) return null
+            if (depths.isEmpty()) return null
             val depth = depths[0]
             depthList.add(depth)
         }
-        val toBeDeleted = mutableListOf<Depth>()
-        for (d in depthList) {
-            if (depthList[0].depth != d.depth) toBeDeleted.add(d)
-        }
+        val toBeDeleted = depthList.filter { d -> depthList[0].depth != d.depth }
         depthList.removeAll(toBeDeleted)
-        val map = LinkedHashMap<Int, Depth>(depthList.size)
+        val map = mutableMapOf<Int, Depth>()
         for (d in depthList) {
             val key = d.toString().hashCode()
             map[key] = d
@@ -36,14 +33,11 @@ class DepthFinder(db: ILexicalDatabase) {
         return depthList
     }
 
-    private fun getSynsetDepths(concept: Concept): List<Depth>? {
-        val history = HashSet<Concept>()
-        val hyperTrees = pathFinder.getHypernymTrees(concept, history)
-        val depths = ArrayList<Depth>(hyperTrees.size)
-        hyperTrees.forEach { hyperTree ->
-            depths.add(Depth(concept, hyperTree.size, hyperTree[0]))
-        }
-        depths.sortBy { it.depth }
+    private fun getSynsetDepths(concept: Concept): List<Depth> {
+        val hyperTrees = pathFinder.getHypernymTrees(concept, mutableSetOf())
+        val depths = hyperTrees
+            .map { hyperTree -> Depth(concept, hyperTree.size, hyperTree[0]) }
+            .sortedBy { it.depth }
         return depths
     }
 
@@ -58,6 +52,6 @@ class DepthFinder(db: ILexicalDatabase) {
     }
 
     fun getShortestDepth(concept: Concept): Int {
-        return requireNotNull(getSynsetDepths(concept))[0].depth
+        return getSynsetDepths(concept)[0].depth
     }
 }

@@ -6,7 +6,6 @@ import jiachian.lexical_db.item.POS
 import jiachian.ws4j.Relatedness
 import jiachian.ws4j.RelatednessCalculator
 import jiachian.ws4j.util.WS4JConfiguration
-import java.util.*
 
 
 /**
@@ -37,15 +36,15 @@ class WuPalmer(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         }
         val subTracer = if (WS4JConfiguration.getInstance().useTrace()) StringBuilder() else null
         val lcsList = depthFinder.getRelatedness(concept1, concept2, subTracer)
-        if (lcsList.isNullOrEmpty()) return Relatedness(min)
+        if (requireNotNull(lcsList).isEmpty()) return Relatedness(min)
         val depth = lcsList[0].depth
         val depth1 = depthFinder.getShortestDepth(concept1)
         val depth2 = depthFinder.getShortestDepth(concept2)
         var score = 0.0
-        if (depth1 > 0 && depth2 > 0) score = (2 * depth).toDouble() / (depth1 + depth2).toDouble()
+        if (depth1 > 0 && depth2 > 0) score = 2.0 * depth / (depth1 + depth2)
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("WUP(").append(concept1).append(", ").append(concept2).append(")\n")
-            tracer.append(Objects.requireNonNull(subTracer))
+            tracer.append(requireNotNull(subTracer))
             lcsList.forEach { lcs ->
                 tracer.append("Lowest Common Subsumer(s): ")
                 tracer.append(lcs.leaf).append(" (Depth = ").append(lcs.depth).append(")\n")

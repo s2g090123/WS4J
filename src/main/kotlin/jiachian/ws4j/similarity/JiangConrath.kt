@@ -7,7 +7,6 @@ import jiachian.ws4j.Relatedness
 import jiachian.ws4j.RelatednessCalculator
 import jiachian.ws4j.util.ICFinder
 import jiachian.ws4j.util.WS4JConfiguration
-import java.util.*
 import kotlin.math.ln
 
 
@@ -50,11 +49,10 @@ class JiangConrath(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         }
         val subTracer = if (WS4JConfiguration.getInstance().useTrace()) StringBuilder() else null
         val lcsList = ICFinder.instance.getLCSbyIC(pathFinder, concept1, concept2, subTracer)
-        requireNotNull(lcsList)
-        if (lcsList.isEmpty()) return Relatedness(min, tracer.toString(), null)
+        if (requireNotNull(lcsList).isEmpty()) return Relatedness(min, tracer.toString(), null)
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("JCN(").append(concept1).append(", ").append(concept2).append(")\n")
-            tracer.append(Objects.requireNonNull(subTracer))
+            tracer.append(requireNotNull(subTracer))
             lcsList.forEach { lcs ->
                 tracer.append("Lowest Common Subsumer(s): ")
                 tracer.append(lcs.subsumer.toString()).append(" (IC = ").append(lcs.iC).append(")\n")
@@ -62,19 +60,21 @@ class JiangConrath(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         }
         val subsumer = lcsList[0]
         val lcsIC = subsumer.iC
-        val rootConcept = pathFinder.getRoot(subsumer.subsumer)
-        rootConcept?.pos = subsumer.subsumer.pos
-        val rootFreq = rootConcept?.let { ICFinder.instance.getFrequency(it) } ?: 0
-        if (rootFreq <= 0) return Relatedness(min, tracer.toString(), null)
+        val rootConcept = requireNotNull(pathFinder.getRoot(subsumer.subsumer)).apply {
+            pos = subsumer.subsumer.pos
+        }
+        val rootFreq = ICFinder.instance.getFrequency(rootConcept)
+        if (rootFreq <= 0) {
+            return Relatedness(min, tracer.toString(), null)
+        }
         val ic1 = ICFinder.instance.IC(pathFinder, concept1)
         val ic2 = ICFinder.instance.IC(pathFinder, concept2)
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("IC(").append(concept1).append(") = ").append(ic1).append("\n")
             tracer.append("IC(").append(concept2).append(") = ").append(ic2).append("\n")
         }
-        val distance: Double
-        if (ic1 > 0 && ic2 > 0) {
-            distance = ic1 + ic2 - (2 * lcsIC)
+        val distance = if (ic1 > 0 && ic2 > 0) {
+            ic1 + ic2 - (2 * lcsIC)
         } else {
             return Relatedness(min, tracer.toString(), null)
         }

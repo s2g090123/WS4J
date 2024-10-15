@@ -31,8 +31,8 @@ class ICFinder private constructor() {
         val isr = InputStreamReader(stream)
         val br = BufferedReader(isr)
         var line = ""
-        while ((br.readLine()?.also { line = it }) != null) {
-            val elements = line.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        while (br.readLine()?.also { line = it } != null) {
+            val elements = line.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
             if (elements.size >= 2) {
                 val e = elements[0]
                 val pos = POS.getPOS(e[e.length - 1])
@@ -61,12 +61,7 @@ class ICFinder private constructor() {
             path.iC = IC(pathFinder, path.subsumer)
         }
         val sortedPaths = paths.sortedByDescending { it.iC }
-        val results = ArrayList<PathFinder.Subsumer>(paths.size)
-        sortedPaths.forEach { path ->
-            if (path.iC == sortedPaths[0].iC) {
-                results.add(path)
-            }
-        }
+        val results = sortedPaths.filter { path -> path.iC == sortedPaths[0].iC }
         return results
     }
 
@@ -100,8 +95,7 @@ class ICFinder private constructor() {
             }
         }
         val offFreq = getFrequency(concept)
-        if (offFreq <= rootFreq) return offFreq.toDouble() / rootFreq.toDouble()
-        return 0.0
+        return if (offFreq <= rootFreq) return offFreq / rootFreq.toDouble() else 0.0
     }
 
     fun getFrequency(concept: Concept): Int {

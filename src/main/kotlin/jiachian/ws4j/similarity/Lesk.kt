@@ -40,19 +40,18 @@ class Lesk(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         val tracer = StringBuilder()
         if (concept1 == null || concept2 == null) return Relatedness(min)
         val glosses = glossFinder.getSuperGlosses(concept1, concept2)
-        var score = 0
+        var score = 0.0
         for (gloss in glosses) {
-            var functionsScore = calcFromSuperGloss(gloss.gloss1, gloss.gloss2)
-            functionsScore *= gloss.weight
+            val functionsScore = calcFromSuperGloss(gloss.gloss1, gloss.gloss2) * gloss.weight
             if (WS4JConfiguration.getInstance().useTrace() && functionsScore > 0) {
                 tracer.append("LESK(").append(concept1).append(", ").append(concept2).append(")\n")
                 tracer.append("Functions: ").append(gloss.link1.trim { it <= ' ' }).append(" - ")
                     .append(gloss.link2.trim { it <= ' ' }).append(" : ").append(functionsScore).append("\n")
                 tracer.append(overlapLogMax).append("\n")
             }
-            score = (score + functionsScore).toInt()
+            score += functionsScore
         }
-        return Relatedness(score.toDouble(), tracer.toString(), null)
+        return Relatedness(score, tracer.toString(), null)
     }
 
     private fun calcFromSuperGloss(glosses1: List<String>, glosses2: List<String>): Double {
@@ -76,8 +75,8 @@ class Lesk(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         if (WS4JConfiguration.getInstance().useTrace()) {
             overlapLog = StringBuilder("Overlaps: ")
         }
-        for (key in overlaps.overlapsHash?.keys ?: emptySet<String>()) {
-            val tempArray = key.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        for (key in requireNotNull(overlaps.overlapsHash).keys) {
+            val tempArray = key.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
             val value = (tempArray.size) * (tempArray.size) * (overlaps.overlapsHash?.get(key) ?: 0)
             functionsScore += value.toDouble()
             if (WS4JConfiguration.getInstance().useTrace()) {
@@ -94,7 +93,7 @@ class Lesk(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         if (WS4JConfiguration.getInstance().useLeskNormalizer()) {
             val denominator = overlaps.length1 + overlaps.length2
             if (denominator > 0) {
-                functionsScore /= denominator.toDouble()
+                functionsScore /= denominator
             }
             if (WS4JConfiguration.getInstance().useTrace()) {
                 overlapLog

@@ -7,7 +7,6 @@ import jiachian.ws4j.Relatedness
 import jiachian.ws4j.RelatednessCalculator
 import jiachian.ws4j.util.ICFinder
 import jiachian.ws4j.util.WS4JConfiguration
-import java.util.*
 
 
 /**
@@ -56,7 +55,7 @@ class Resnik(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
         }
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("RES(").append(concept1).append(", ").append(concept2).append(")\n")
-            tracer.append(Objects.requireNonNull(subTracer))
+            tracer.append(requireNotNull(subTracer))
             lcsList.forEach { lcs ->
                 tracer.append("Lowest Common Subsumer(s): ")
                 tracer.append(lcs.subsumer).append(" (IC = ").append(lcs.iC).append(")\n")

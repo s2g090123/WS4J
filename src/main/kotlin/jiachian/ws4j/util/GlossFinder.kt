@@ -9,18 +9,16 @@ class GlossFinder(private val db: ILexicalDatabase) {
         concept1: Concept,
         concept2: Concept
     ): List<SuperGloss> {
-        val glosses = ArrayList<SuperGloss>(linkPairs.size)
-        linkPairs.forEach { links ->
-            glosses.add(
+        val glosses = linkPairs
+            .map { links ->
                 SuperGloss(
                     db.getGloss(concept1, links[0]),
                     db.getGloss(concept2, links[1]),
-                    links[0]?.name ?: " ",
-                    links[1]?.name ?: " ",
+                    links[0]?.id ?: " ",
+                    links[1]?.id ?: " ",
                     1.0
                 )
-            )
-        }
+            }
         return glosses
     }
 

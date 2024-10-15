@@ -97,8 +97,8 @@ class HirstStOnge(db: ILexicalDatabase) : RelatednessCalculator(db, min, max) {
             if (from == endSynset && distance > 1) return 8 - distance - chdir
             if (distance >= 5) return 0
             val horizontal = traverser.getHorizontalSynsets(from)
-            val upward = if ((state == 0 || state == 1)) traverser.getUpwardSynsets(from) else emptySet()
-            val downward = if ((state != 6)) traverser.getDownwardSynsets(from) else emptySet()
+            val upward = if (state == 0 || state == 1) traverser.getUpwardSynsets(from) else emptySet()
+            val downward = if (state != 6) traverser.getDownwardSynsets(from) else emptySet()
             return when (state) {
                 0 -> {
                     val retU = findU(upward, 1, distance, 0, path, endSynset)

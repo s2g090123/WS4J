@@ -20,8 +20,10 @@ class Relatedness {
         this.trace = StringBuffer(trace ?: "")
         this.error = StringBuffer(error ?: "")
         if (WS4JConfiguration.getInstance().useTrace() && this.trace.toString() != "") {
-            val strs = trace?.split("\\R".toRegex())?.dropLastWhile { it.isEmpty() } ?: emptyList()
-            for (str in strs) LOGGER.info(str)
+            trace
+                ?.split("\\R".toRegex())
+                ?.dropLastWhile { it.isEmpty() }
+                ?.forEach { str -> LOGGER.info(str) }
         }
         if (WS4JConfiguration.getInstance().useTrace() && this.error.toString() != "") {
             LOGGER.error(error)

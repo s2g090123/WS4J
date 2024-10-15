@@ -6,7 +6,6 @@ import jiachian.lexical_db.item.POS
 import jiachian.ws4j.Relatedness
 import jiachian.ws4j.RelatednessCalculator
 import jiachian.ws4j.util.WS4JConfiguration
-import java.util.*
 import kotlin.math.ln
 
 
@@ -55,17 +54,16 @@ class LeacockChodorow(db: ILexicalDatabase) : RelatednessCalculator(db, min, max
         val subTracer = if (WS4JConfiguration.getInstance().useTrace()) StringBuilder() else null
         val lcsList = pathFinder.getLCSByPath(concept1, concept2, subTracer)
         if (lcsList.isEmpty()) return Relatedness(min)
-        var maxDepth = 1
-        if (concept1.pos == POS.NOUN) {
-            maxDepth = 20
-        } else if (concept1.pos == POS.VERB) {
-            maxDepth = 14
+        val maxDepth = when (concept1.pos) {
+            POS.NOUN -> 20
+            POS.VERB -> 14
+            else -> 1
         }
         val length = lcsList[0].pathLength
-        val score = -ln(length.toDouble() / (2 * maxDepth).toDouble())
+        val score = -ln(length / (2.0 * maxDepth))
         if (WS4JConfiguration.getInstance().useTrace()) {
             tracer.append("LCH(").append(concept1).append(", ").append(concept2).append(")\n")
-            tracer.append(Objects.requireNonNull(subTracer))
+            tracer.append(requireNotNull(subTracer))
             lcsList.forEach { lcs ->
                 tracer.append("Lowest Common Subsumer(s): ")
                 tracer.append(lcs.subsumer.toString()).append(" (Length = ").append(lcs.pathLength).append(")\n")
