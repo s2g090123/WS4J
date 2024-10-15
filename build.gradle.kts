@@ -50,7 +50,7 @@ tasks {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.23")
 
     implementation("org.apache.opennlp:opennlp-tools:1.8.4")
     implementation("com.github.rm-hull:jwi:7d37b0d23d")
