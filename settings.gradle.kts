@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "WS4j"
+rootProject.name = "WS4j-KT"
