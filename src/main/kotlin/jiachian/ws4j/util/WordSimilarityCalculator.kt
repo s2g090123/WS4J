@@ -20,12 +20,12 @@ class WordSimilarityCalculator {
     }
 
     fun calcRelatednessOfWords(
-        word1: String,
-        word2: String,
+        word1: String?,
+        word2: String?,
         rc: RelatednessCalculator
     ): Double {
         if (word1 == word2) return rc.max
-        if (word1.isEmpty() || word2.isEmpty()) return rc.min
+        if (word1.isNullOrEmpty() || word2.isNullOrEmpty()) return rc.min
 
         var normalizeWord1 = normalize(word1)
         var normalizeWord2 = normalize(word2)

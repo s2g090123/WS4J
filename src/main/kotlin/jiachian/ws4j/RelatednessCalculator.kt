@@ -35,7 +35,7 @@ abstract class RelatednessCalculator(
         return r
     }
 
-    fun calcRelatednessOfWords(word1: String, word2: String): Double {
+    fun calcRelatednessOfWords(word1: String?, word2: String?): Double {
         return wordSimilarity.calcRelatednessOfWords(word1, word2, this)
     }
 
